@@ -1,3 +1,5 @@
+import os
+import pathlib
 import pytest
 
 
@@ -23,3 +25,18 @@ def enc_data():
         b'cneygudegEb_RHXERH8ktOP4pFkwfGbmzqWE9ikGGcRGZQFME9tHjESSZ0BqNR3DOXsV'
         b'477A-fXyHQdWCjCPqyxwowf70Q=='
     )
+
+
+@pytest.fixture
+def app_path():
+    return pathlib.Path(os.environ.get("appdata"), "shushi")
+
+
+@pytest.fixture
+def vault_path(app_path):
+    return app_path.joinpath("vault")
+
+
+@pytest.fixture
+def salt_path(app_path):
+    return app_path.joinpath("salt")
