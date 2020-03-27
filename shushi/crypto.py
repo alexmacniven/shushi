@@ -8,7 +8,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 
-def encrypt(salt: bytes, password: str, dec_data: dict):
+def encrypt(salt: bytes, password: str, dec_data: dict) -> bytes:
     fernet = make_fernet(salt, password)
     datastr = json.dumps(dec_data)
     return fernet.encrypt(datastr.encode())
