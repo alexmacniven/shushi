@@ -1,8 +1,9 @@
 import pytest
-
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from shushi.crypto import _kdf, _salt, _key, _fernet
+
+from shushi.crypto import (_fernet, _kdf, _key, _salt, decrypt, encrypt,
+                           make_fernet)
 
 
 @pytest.fixture
@@ -43,3 +44,15 @@ def test_key_returns_type(kdf, password):
 
 def test_fernet_returns_type(key):
     assert type(_fernet(key)) == Fernet
+
+
+def test_make_fernet_returns_type(salt, password):
+    assert type(make_fernet(salt, password)) == Fernet
+
+
+def test_encrypt_returns_type(salt, password, dec_data):
+    assert type(encrypt(salt, password, dec_data)) == bytes
+
+
+def test_decrypt_returns_value(salt, password, enc_data, dec_data):
+    assert decrypt(salt, password, enc_data) == dec_data

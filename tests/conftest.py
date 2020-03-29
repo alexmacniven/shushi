@@ -1,5 +1,3 @@
-import os
-import pathlib
 import pytest
 
 
@@ -28,8 +26,8 @@ def enc_data():
 
 
 @pytest.fixture
-def app_path():
-    return pathlib.Path(os.environ.get("appdata"), "shushi")
+def app_path(tmp_path):
+    return tmp_path
 
 
 @pytest.fixture
