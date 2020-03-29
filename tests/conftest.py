@@ -46,5 +46,5 @@ def new_item():
 
 
 @pytest.fixture
-def expected_data():
+def populated_data():
     return dict(twitter=dict(user="Joe", password="Bl0ggs"))

@@ -34,3 +34,10 @@ def validate_item_name(item: dict) -> str:
     small_name: str = raw_name.lower()
     snake_name: str = small_name.replace(" ", "_")
     return snake_name
+
+
+def remove_item(name: str, data: dict) -> bool:
+    if name in data.keys():
+        data.pop(name)
+        return True
+    return False
