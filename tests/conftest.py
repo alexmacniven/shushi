@@ -47,4 +47,4 @@ def new_item():
 
 @pytest.fixture
 def expected_data():
-    return dict(twitter=dict(users="Joe", password="Bl0ggs"))
+    return dict(twitter=dict(user="Joe", password="Bl0ggs"))

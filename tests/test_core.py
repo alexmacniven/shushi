@@ -1,4 +1,7 @@
-from shushi.core import build_salt, build_vault, make_vault
+import pytest
+
+from shushi.core import (add_item, build_salt, build_vault, make_vault,
+                         validate_item_name)
 
 
 def test_build_salt_returns_type(app_path):
@@ -18,6 +21,24 @@ def test_make_vault_creates_file_path(password, vault_path, app_path):
 def test_make_vault_creates_salt_path(password, salt_path, app_path):
     make_vault(app_path, password)
     assert salt_path.is_file()
+
+
+def test_add_item_not_member_no_force(new_item, expected_data):
+    data = dict()
+    assert add_item(new_item, data) is True
+    assert data == expected_data
+
+
+def test_add_item_is_member_no_force(new_item, expected_data):
+    data = dict(twitter=dict(user="Joe", password="Bl0ggs"))
+    assert add_item(new_item, data) is False
+    assert data == expected_data
+
+
+def test_add_item_is_member_with_force(new_item, expected_data):
+    data = dict(twitter=dict(user="John", password="Sm1th"))
+    assert add_item(new_item, data, force=True) is True
+    assert data == expected_data
 
 
 def test_validate_item_name(new_item):

@@ -22,13 +22,11 @@ def build_vault(path: Path, salt: bytes, password: str):
 
 
 def add_item(item: dict, data: dict, force: bool = False) -> bool:
-    # Pop name from item; raise exception when name not suppleied
-    # Decrypt vault contents as data: raise exception when fail
-    # When name in data keys and force is False: return False
-    # Add key/val pair to data where key is name and val is item
-    # Encrypt data as vault contents
-    # Return True
-    pass
+    item_name = validate_item_name(item)
+    if item_name in data.keys() and not force:
+        return False
+    data[item_name] = item
+    return True
 
 
 def validate_item_name(item: dict) -> str:
