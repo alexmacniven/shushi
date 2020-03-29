@@ -29,3 +29,10 @@ def add_item(item: dict, data: dict, force: bool = False) -> bool:
     # Encrypt data as vault contents
     # Return True
     pass
+
+
+def validate_item_name(item: dict) -> str:
+    raw_name: str = item.pop("name")  # raises KeyError
+    small_name: str = raw_name.lower()
+    snake_name: str = small_name.replace(" ", "_")
+    return snake_name

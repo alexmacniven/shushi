@@ -38,3 +38,13 @@ def vault_path(app_path):
 @pytest.fixture
 def salt_path(app_path):
     return app_path.joinpath("salt")
+
+
+@pytest.fixture
+def new_item():
+    return dict(name="twitter", user="Joe", password="Bl0ggs")
+
+
+@pytest.fixture
+def expected_data():
+    return dict(twitter=dict(users="Joe", password="Bl0ggs"))
