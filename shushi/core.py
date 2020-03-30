@@ -23,6 +23,22 @@ def build_vault(path: Path, salt: bytes, password: str):
         binio.write(enc_data)
 
 
+def fetch_salt(path: Path) -> bytes:
+    with path.joinpath("salt").open("rb") as binio:
+        return binio.read()
+
+
+def fetch_vault(path: Path) -> bytes:
+    with path.joinpath("vault").open("rb") as binio:
+        return binio.read()
+
+
+def dump_vault(path: Path, vault: bytes):
+    # TODO: Unit test me 🧪
+    with path.joinpath("vault").open("wb") as binio:
+        binio.write(vault)
+
+
 def add_item(item: dict, data: dict, force: bool = False) -> bool:
     item_name = validate_item_name(item)
     if item_name in data.keys() and not force:
