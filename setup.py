@@ -14,6 +14,7 @@ VERSION = "0.0.1-beta.1"
 
 # What packages are required for this module to be executed?
 REQUIRED = [
+    "click",
     "cryptography"
 ]
 
@@ -63,5 +64,10 @@ setup(
     install_requires=REQUIRED,
     extras_require=EXTRAS,
     include_package_data=True,
+    entry_points={
+        "console_scripts": [
+            "shushi=shushi.cli:cli"
+        ]
+    },
     license="NONE"
 )
