@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from .crypto import _salt, encrypt
+from .record import VaultRecord
 
 
 def make_vault(path: Path, password: str):
@@ -41,3 +42,10 @@ def remove_item(name: str, data: dict) -> bool:
         data.pop(name)
         return True
     return False
+
+
+def get_item(name: str, data: dict) -> VaultRecord:
+    if name in data.keys():
+        record: VaultRecord = VaultRecord(name, **data.get(name))
+        return record
+    return None

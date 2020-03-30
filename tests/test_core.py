@@ -1,7 +1,7 @@
 import pytest
 
-from shushi.core import (add_item, build_salt, build_vault, make_vault,
-                         validate_item_name, remove_item)
+from shushi.core import (VaultRecord, add_item, build_salt, build_vault,
+                         get_item, make_vault, remove_item, validate_item_name)
 
 
 def test_build_salt_returns_type(app_path):
@@ -74,3 +74,14 @@ def test_remove_item_not_member(populated_data):
     name = "facebook"
     assert remove_item(name, populated_data) is False
     assert "twitter" in populated_data.keys()
+
+
+def test_get_item_is_member(populated_data):
+    record: VaultRecord = get_item("twitter", populated_data)
+    assert record.name == "twitter"
+    assert record.user == "Joe"
+    assert record.password == "Bl0ggs"
+
+
+def test_get_item_not_member(populated_data):
+    assert get_item("facebook", populated_data) is None
