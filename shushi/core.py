@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 
 from .crypto import _salt, encrypt
 from .record import VaultRecord
@@ -49,3 +50,7 @@ def get_item(name: str, data: dict) -> VaultRecord:
         record: VaultRecord = VaultRecord(name, **data.get(name))
         return record
     return None
+
+
+def list_items(data: dict) -> List:
+    return list(data.keys())

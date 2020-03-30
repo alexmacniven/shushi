@@ -1,7 +1,8 @@
 import pytest
 
 from shushi.core import (VaultRecord, add_item, build_salt, build_vault,
-                         get_item, make_vault, remove_item, validate_item_name)
+                         get_item, list_items, make_vault, remove_item,
+                         validate_item_name)
 
 
 def test_build_salt_returns_type(app_path):
@@ -24,19 +25,22 @@ def test_make_vault_creates_salt_path(password, salt_path, app_path):
 
 
 def test_add_item_not_member_no_force(new_item, populated_data):
-    data = dict()
+    data = dict(reddit=dict(user="Tom", password="J0nes"))
     assert add_item(new_item, data) is True
     assert data == populated_data
 
 
 def test_add_item_is_member_no_force(new_item, populated_data):
-    data = dict(twitter=dict(user="Joe", password="Bl0ggs"))
+    data = populated_data
     assert add_item(new_item, data) is False
     assert data == populated_data
 
 
 def test_add_item_is_member_with_force(new_item, populated_data):
-    data = dict(twitter=dict(user="John", password="Sm1th"))
+    data = dict(
+        twitter=dict(user="John", password="Sm1th"),
+        reddit=dict(user="Tom", password="J0nes")
+    )
     assert add_item(new_item, data, force=True) is True
     assert data == populated_data
 
@@ -74,6 +78,7 @@ def test_remove_item_not_member(populated_data):
     name = "facebook"
     assert remove_item(name, populated_data) is False
     assert "twitter" in populated_data.keys()
+    assert "reddit" in populated_data.keys()
 
 
 def test_get_item_is_member(populated_data):
@@ -85,3 +90,7 @@ def test_get_item_is_member(populated_data):
 
 def test_get_item_not_member(populated_data):
     assert get_item("facebook", populated_data) is None
+
+
+def test_list_items(populated_data):
+    assert list_items(populated_data) == ["twitter", "reddit"]
