@@ -1,10 +1,11 @@
-import click
 import os
-from . import core
-from . import crypto
 from typing import List
-from .record import VaultRecord
+
+import click
+
+from . import core, crypto
 from .constants import APPDATA
+from .record import VaultRecord
 
 
 @click.group()
@@ -115,3 +116,7 @@ def list(ctx):
     items: List = core.list_items(ctx.obj.get("decrypted"))
     for item in items:
         click.secho(item, fg="yellow")
+
+# TODO: Add 'env' command
+# 'env' should list all user specified SHUSHI_ environment variables and
+# link to documentation.

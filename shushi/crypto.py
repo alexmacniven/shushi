@@ -16,6 +16,7 @@ def encrypt(salt: bytes, password: str, dec_data: dict) -> bytes:
 
 def decrypt(salt: bytes, password: str, enc_data: bytes) -> dict:
     fernet = make_fernet(salt, password)
+    # TODO: Adds exception handling.
     raw = fernet.decrypt(enc_data)
     raw_str = raw.decode()
     return json.loads(raw_str)
