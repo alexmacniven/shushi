@@ -28,7 +28,7 @@ def make(password, force):
         click.echo("Vault already exists. Run with --force to override\n")
 
 
-@cli.command()
+@cli.command(help="Adds a new item")
 @click.argument("password")
 @click.argument("name")
 @click.option(
@@ -63,7 +63,7 @@ def item_builder(name: str) -> dict:
     return item_dict
 
 
-@cli.command()
+@cli.command(help="Returns an item")
 @click.argument("password")
 @click.argument("name")
 def get(password, name):
@@ -78,7 +78,7 @@ def get(password, name):
         click.echo(f"Item not matched: {name}")
 
 
-@cli.command()
+@cli.command(help="Removes an item")
 @click.argument("password")
 @click.argument("name")
 def remove(password, name):
@@ -93,7 +93,7 @@ def remove(password, name):
         click.echo(f"Item not matched: {name}")
 
 
-@cli.command()
+@cli.command(help="Returns all item names")
 @click.argument("password")
 def list(password):
     salt: bytes = core.fetch_salt(APPDATA)
