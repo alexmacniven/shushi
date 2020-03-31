@@ -1,6 +1,7 @@
 import click
 from . import core
 from . import crypto
+from .record import VaultRecord
 from .constants import APPDATA
 
 
@@ -45,7 +46,7 @@ def add(password, name, force):
         encrypted: bytes = crypto.encrypt(salt, password, decrypted)
         core.dump_vault(APPDATA, encrypted)
     else:
-        click.echo("Item already exists. Run with --force to override\n\n")    
+        click.echo("Item already exists. Run with --force to override\n\n")
 
 
 def item_builder(name: str) -> dict:
@@ -59,3 +60,16 @@ def item_builder(name: str) -> dict:
         item_dict[field] = value
         count += 1
     return item_dict
+
+
+@cli.command()
+@click.argument("password")
+@click.argument("name")
+def get(password, name):
+    salt: bytes = core.fetch_salt(APPDATA)
+    vault: bytes = core.fetch_vault(APPDATA)
+    decrypted: dict = crypto.decrypt(salt, password, vault)
+    item: VaultRecord = core.get_item(name, decrypted)
+    if item is not None:
+        for key, value in item.__dict__.items():
+            click.echo(f"{key} -> {value}")
