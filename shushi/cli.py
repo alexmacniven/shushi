@@ -73,3 +73,20 @@ def get(password, name):
     if item is not None:
         for key, value in item.__dict__.items():
             click.echo(f"{key} -> {value}")
+    else:
+        click.echo(f"Item not matched: {name}")
+
+
+@cli.command()
+@click.argument("password")
+@click.argument("name")
+def remove(password, name):
+    salt: bytes = core.fetch_salt(APPDATA)
+    vault: bytes = core.fetch_vault(APPDATA)
+    decrypted: dict = crypto.decrypt(salt, password, vault)
+    if core.remove_item(name, decrypted):
+        click.echo(f"Item has been removed: {name}")
+        encrypted: bytes = crypto.encrypt(salt, password, decrypted)
+        core.dump_vault(APPDATA, encrypted)
+    else:
+        click.echo(f"Item not matched: {name}")
