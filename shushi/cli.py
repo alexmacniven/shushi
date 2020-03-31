@@ -13,7 +13,7 @@ from .record import VaultRecord
 @click.pass_context
 def cli(ctx, password):
     ctx.ensure_object(dict)
-    password_ = os.environ.get("SHUSHI_PASSWORD", password)
+    password_ = password or os.environ.get("SHUSHI_PASSWORD", None)
     if password_ is not None:
         ctx.obj["password"] = password_
         ctx.obj["salt"] = core.fetch_salt(APPDATA)
