@@ -1,6 +1,7 @@
 import click
 from . import core
 from . import crypto
+from typing import List
 from .record import VaultRecord
 from .constants import APPDATA
 
@@ -90,3 +91,14 @@ def remove(password, name):
         core.dump_vault(APPDATA, encrypted)
     else:
         click.echo(f"Item not matched: {name}")
+
+
+@cli.command()
+@click.argument("password")
+def list(password):
+    salt: bytes = core.fetch_salt(APPDATA)
+    vault: bytes = core.fetch_vault(APPDATA)
+    decrypted: dict = crypto.decrypt(salt, password, vault)
+    items: List = core.list_items(decrypted)
+    for item in items:
+        click.echo(item)
