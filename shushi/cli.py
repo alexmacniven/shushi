@@ -5,7 +5,7 @@ import click
 
 from . import core, crypto
 from .data import SetupFacts
-from .exceptions import IncorrectPassword
+from .exceptions import IncorrectPassword, ItemExists, ItemNotFound
 from .constants import APPDATA
 from .record import VaultRecord
 
@@ -33,6 +33,7 @@ def cli(ctx, password):
 @click.pass_context
 def make(ctx, force):
     vault_path = APPDATA.joinpath("vault")
+    # TODO: Use exceptions here?
     if not vault_path.is_file() or force:
         core.make_vault(APPDATA, ctx.obj.get("password"))
         click.secho("A new vault has been created", fg="green")
@@ -52,16 +53,20 @@ def make(ctx, force):
 def add(ctx, name, force):
     artifacts: SetupFacts = setup(ctx.obj.get("password"))
     new_item: dict = item_builder(name)
-    if core.add_item(new_item, artifacts.decrypted, force):
-        click.secho(f"Added new item: {name}", fg="green")
-        encrypted: bytes = crypto.encrypt(
-            artifacts.salt,
-            ctx.obj.get("password"),
-            artifacts.decrypted
-        )
-        core.dump_vault(APPDATA, encrypted)
-    else:
-        click.secho("Item already exists", fg="red")
+
+    try:
+        core.add_item(new_item, artifacts.decrypted, force)
+    except ItemExists as exc:
+        exc.show()
+        raise SystemExit(exc.exit_code)
+
+    click.secho(f"Added new item: {name}", fg="green")
+    encrypted: bytes = crypto.encrypt(
+        artifacts.salt,
+        ctx.obj.get("password"),
+        artifacts.decrypted
+    )
+    core.dump_vault(APPDATA, encrypted)
 
 
 def item_builder(name: str) -> dict:
@@ -82,13 +87,16 @@ def item_builder(name: str) -> dict:
 @click.pass_context
 def get(ctx, name):
     artifacts: SetupFacts = setup(ctx.obj.get("password"))
-    item: VaultRecord = core.get_item(name, artifacts.decrypted)
-    if item is not None:
-        for key, value in item.__dict__.items():
-            click.secho(f"{key} -> ", nl=False, fg="yellow")
-            click.echo(f"{value}")
-    else:
-        click.secho(f"Item not matched: {name}", fg="red")
+
+    try:
+        item: VaultRecord = core.get_item(name, artifacts.decrypted)
+    except ItemNotFound as exc:
+        exc.show()
+        raise SystemExit(exc.exit_code)
+
+    for key, value in item.__dict__.items():
+        click.secho(f"{key} -> ", nl=False, fg="yellow")
+        click.echo(f"{value}")
 
 
 @cli.command(help="Removes an item")
@@ -96,16 +104,19 @@ def get(ctx, name):
 @click.pass_context
 def remove(ctx, name):
     artifacts: SetupFacts = setup(ctx.obj.get("password"))
-    if core.remove_item(name, artifacts.decrypted):
-        click.echo(f"Item has been removed: {name}")
-        encrypted: bytes = crypto.encrypt(
-            artifacts.salt,
-            ctx.obj.get("password"),
-            artifacts.decrypted,
-        )
-        core.dump_vault(APPDATA, encrypted)
-    else:
-        click.secho(f"Item not matched: {name}", fg="red")
+    try:
+        core.remove_item(name, artifacts.decrypted)
+    except ItemNotFound as exc:
+        exc.show()
+        raise SystemExit(exc.exit_code)
+
+    click.echo(f"Item has been removed: {name}")
+    encrypted: bytes = crypto.encrypt(
+        artifacts.salt,
+        ctx.obj.get("password"),
+        artifacts.decrypted,
+    )
+    core.dump_vault(APPDATA, encrypted)
 
 
 @cli.command(help="Returns all item names")

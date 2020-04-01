@@ -3,6 +3,7 @@ from typing import List
 
 from .crypto import _salt, encrypt
 from .record import VaultRecord
+from .exceptions import ItemExists, ItemNotFound
 
 
 def make_vault(path: Path, password: str):
@@ -39,12 +40,11 @@ def dump_vault(path: Path, vault: bytes):
         binio.write(vault)
 
 
-def add_item(item: dict, data: dict, force: bool = False) -> bool:
+def add_item(item: dict, data: dict, force: bool = False):
     item_name = validate_item_name(item)
     if item_name in data.keys() and not force:
-        return False
+        raise ItemExists(item_name)
     data[item_name] = item
-    return True
 
 
 def validate_item_name(item: dict) -> str:
@@ -54,18 +54,17 @@ def validate_item_name(item: dict) -> str:
     return snake_name
 
 
-def remove_item(name: str, data: dict) -> bool:
+def remove_item(name: str, data: dict):
     if name in data.keys():
         data.pop(name)
-        return True
-    return False
+    raise ItemNotFound(name)
 
 
 def get_item(name: str, data: dict) -> VaultRecord:
     if name in data.keys():
         record: VaultRecord = VaultRecord(name, **data.get(name))
         return record
-    return None
+    raise ItemNotFound(name)
 
 
 def list_items(data: dict) -> List:
