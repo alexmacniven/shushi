@@ -2,7 +2,9 @@ import base64
 import json
 import os
 
-from cryptography.fernet import Fernet
+from .exceptions import IncorrectPassword
+
+from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -16,8 +18,10 @@ def encrypt(salt: bytes, password: str, dec_data: dict) -> bytes:
 
 def decrypt(salt: bytes, password: str, enc_data: bytes) -> dict:
     fernet = make_fernet(salt, password)
-    # TODO: Adds exception handling.
-    raw = fernet.decrypt(enc_data)
+    try:
+        raw = fernet.decrypt(enc_data)
+    except InvalidToken:
+        raise IncorrectPassword("Supplied password was incorrect.")
     raw_str = raw.decode()
     return json.loads(raw_str)
 

@@ -4,6 +4,8 @@ from typing import List
 import click
 
 from . import core, crypto
+from .data import SetupFacts
+from .exceptions import IncorrectPassword
 from .constants import APPDATA
 from .record import VaultRecord
 
@@ -13,17 +15,9 @@ from .record import VaultRecord
 @click.pass_context
 def cli(ctx, password):
     ctx.ensure_object(dict)
-    password_ = password or os.environ.get("SHUSHI_PASSWORD", None)
-    if password_ is not None:
-        ctx.obj["password"] = password_
-        ctx.obj["salt"] = core.fetch_salt(APPDATA)
-        ctx.obj["vault"] = core.fetch_vault(APPDATA)
-        ctx.obj["decrypted"] = crypto.decrypt(
-            ctx.obj.get("salt"),
-            ctx.obj.get("password"),
-            ctx.obj.get("vault")
-        )
-    else:
+    # Supplied password overrides environment password.
+    ctx.obj["password"] = password or os.environ.get("SHUSHI_PASSWORD", None)
+    if not ctx.obj.get("password"):
         click.secho("A password has not been supplied", fg="bright_red")
         ctx.abort()
 
@@ -36,10 +30,11 @@ def cli(ctx, password):
     flag_value=True,
     help="Forces creation even if a vault exists"
 )
-def make(password, force):
+@click.pass_context
+def make(ctx, force):
     vault_path = APPDATA.joinpath("vault")
     if not vault_path.is_file() or force:
-        core.make_vault(APPDATA, password)
+        core.make_vault(APPDATA, ctx.obj.get("password"))
         click.secho("A new vault has been created", fg="green")
     else:
         click.secho("A vault already exists", fg="red")
@@ -55,13 +50,14 @@ def make(password, force):
 )
 @click.pass_context
 def add(ctx, name, force):
+    artifacts: SetupFacts = setup(ctx.obj.get("password"))
     new_item: dict = item_builder(name)
-    if core.add_item(new_item, ctx.obj.get("decrypted"), force):
+    if core.add_item(new_item, artifacts.decrypted, force):
         click.secho(f"Added new item: {name}", fg="green")
         encrypted: bytes = crypto.encrypt(
-            ctx.obj.get("salt"),
+            artifacts.salt,
             ctx.obj.get("password"),
-            ctx.obj.get("decrypted")
+            artifacts.decrypted
         )
         core.dump_vault(APPDATA, encrypted)
     else:
@@ -85,7 +81,8 @@ def item_builder(name: str) -> dict:
 @click.argument("name")
 @click.pass_context
 def get(ctx, name):
-    item: VaultRecord = core.get_item(name, ctx.obj.get("decrypted"))
+    artifacts: SetupFacts = setup(ctx.obj.get("password"))
+    item: VaultRecord = core.get_item(name, artifacts.decrypted)
     if item is not None:
         for key, value in item.__dict__.items():
             click.secho(f"{key} -> ", nl=False, fg="yellow")
@@ -98,12 +95,13 @@ def get(ctx, name):
 @click.argument("name")
 @click.pass_context
 def remove(ctx, name):
-    if core.remove_item(name, ctx.obj.get("decrypted")):
+    artifacts: SetupFacts = setup(ctx.obj.get("password"))
+    if core.remove_item(name, artifacts.decrypted):
         click.echo(f"Item has been removed: {name}")
         encrypted: bytes = crypto.encrypt(
-            ctx.obj.get("salt"),
+            artifacts.salt,
             ctx.obj.get("password"),
-            ctx.obj.get("decrypted")
+            artifacts.decrypted,
         )
         core.dump_vault(APPDATA, encrypted)
     else:
@@ -113,9 +111,22 @@ def remove(ctx, name):
 @cli.command(help="Returns all item names")
 @click.pass_context
 def list(ctx):
-    items: List = core.list_items(ctx.obj.get("decrypted"))
+    artifacts: SetupFacts = setup(ctx.obj.get("password"))
+    items: List = core.list_items(artifacts.decrypted)
     for item in items:
         click.secho(item, fg="yellow")
+
+
+def setup(password) -> SetupFacts:
+    salt: bytes = core.fetch_salt(APPDATA)
+    vault: bytes = core.fetch_vault(APPDATA)
+    try:
+        decrypted: dict = crypto.decrypt(salt, password, vault)
+    except IncorrectPassword as exc:
+        exc.show()
+        raise SystemExit(exc.exit_code)
+    return SetupFacts(salt, vault, decrypted)
+
 
 # TODO: Add 'env' command
 # 'env' should list all user specified SHUSHI_ environment variables and
