@@ -18,7 +18,7 @@ def cli(ctx, password):
     # Supplied password overrides environment password.
     ctx.obj["password"] = password or os.environ.get("SHUSHI_PASSWORD", None)
     if not ctx.obj.get("password"):
-        click.secho("A password has not been supplied", fg="bright_red")
+        click.echo("Error: A password has not been supplied.")
         ctx.abort()
 
 
@@ -36,9 +36,9 @@ def make(ctx, force):
     # TODO: Use exceptions here?
     if not vault_path.is_file() or force:
         core.make_vault(APPDATA, ctx.obj.get("password"))
-        click.secho("A new vault has been created", fg="green")
+        click.echo("Done: A new vault has been created.")
     else:
-        click.secho("A vault already exists", fg="red")
+        click.echo("Error: A vault already exists.")
 
 
 @cli.command(help="Adds a new item")
@@ -60,7 +60,7 @@ def add(ctx, name, force):
         exc.show()
         raise SystemExit(exc.exit_code)
 
-    click.secho(f"Added new item: {name}", fg="green")
+    click.echo(f"Done: A new item [{name}] has been added.")
     encrypted: bytes = crypto.encrypt(
         artifacts.salt,
         ctx.obj.get("password"),
@@ -95,7 +95,7 @@ def get(ctx, name):
         raise SystemExit(exc.exit_code)
 
     for key, value in item.__dict__.items():
-        click.secho(f"{key} -> ", nl=False, fg="yellow")
+        click.echo(f"[{key}]:: ", nl=False)
         click.echo(f"{value}")
 
 
@@ -110,7 +110,7 @@ def remove(ctx, name):
         exc.show()
         raise SystemExit(exc.exit_code)
 
-    click.echo(f"Item has been removed: {name}")
+    click.echo(f"Done: An item [{name}] has been removed.")
     encrypted: bytes = crypto.encrypt(
         artifacts.salt,
         ctx.obj.get("password"),
@@ -125,7 +125,7 @@ def list(ctx):
     artifacts: SetupFacts = setup(ctx.obj.get("password"))
     items: List = core.list_items(artifacts.decrypted)
     for item in items:
-        click.secho(item, fg="yellow")
+        click.echo(item)
 
 
 def setup(password) -> SetupFacts:
