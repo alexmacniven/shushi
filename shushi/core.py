@@ -57,7 +57,8 @@ def validate_item_name(item: dict) -> str:
 def remove_item(name: str, data: dict):
     if name in data.keys():
         data.pop(name)
-    raise ItemNotFound(name)
+    else:
+        raise ItemNotFound(name)
 
 
 def get_item(name: str, data: dict) -> VaultRecord:
