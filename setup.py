@@ -4,9 +4,9 @@ import os
 from setuptools import find_packages, setup
 
 # Package meta-data.
-NAME = "sushi"
+NAME = "shushi"
 DESCRIPTION = "Minimalist secrets management in Python"
-URL = "https://github.com/alexmacniven/sushi"
+URL = "https://github.com/alexmacniven/shushi"
 EMAIL = "macniven.ap@gmail.com"
 AUTHOR = "Alex Macniven"
 REQUIRES_PYTHON = ">=3.7.0"
