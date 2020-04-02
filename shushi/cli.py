@@ -4,9 +4,10 @@ from typing import List
 import click
 
 from . import core, crypto
-from .data import SetupFacts
-from .exceptions import IncorrectPassword, ItemExists, ItemNotFound
 from .constants import APPDATA
+from .data import SetupFacts
+from .exceptions import (IncorrectPassword, ItemExists, ItemNotFound,
+                         VaultExists)
 from .record import VaultRecord
 
 
@@ -32,13 +33,12 @@ def cli(ctx, password):
 )
 @click.pass_context
 def make(ctx, force):
-    vault_path = APPDATA.joinpath("vault")
-    # TODO: Use exceptions here?
-    if not vault_path.is_file() or force:
-        core.make_vault(APPDATA, ctx.obj.get("password"))
-        click.echo("Done: A new vault has been created.")
-    else:
-        click.echo("Error: A vault already exists.")
+    try:
+        core.make(ctx.obj.get("password"), force)
+    except VaultExists as exc:
+        exc.show()
+        raise SystemExit(exc.exit_code)
+    click.echo(f"Done: Vault has been created at [{APPDATA}]")
 
 
 @cli.command(help="Adds a new item")
@@ -137,8 +137,3 @@ def setup(password) -> SetupFacts:
         exc.show()
         raise SystemExit(exc.exit_code)
     return SetupFacts(salt, vault, decrypted)
-
-
-# TODO: Add 'env' command
-# 'env' should list all user specified SHUSHI_ environment variables and
-# link to documentation.

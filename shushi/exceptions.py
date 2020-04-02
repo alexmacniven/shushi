@@ -27,3 +27,11 @@ class ItemNotFound(ShushiException):
         self.item = item
         message = f"An item named [{item}] could not be found."
         ShushiException.__init__(self, message)
+
+
+class VaultExists(ShushiException):
+    """Vault already exists at this path."""
+    def __init__(self, item: str, *args, **kwargs):
+        self.item = item
+        message = f"An vault already exists at [{item}]."
+        ShushiException.__init__(self, message)

@@ -3,22 +3,26 @@ from typing import List
 
 from .crypto import _salt, encrypt
 from .record import VaultRecord
-from .exceptions import ItemExists, ItemNotFound
+from .exceptions import ItemExists, ItemNotFound, VaultExists
+from .constants import APPDATA
 
 
-def make_vault(path: Path, password: str):
-    salt: bytes = build_salt(path)
-    build_vault(path, salt, password)
+def make(password: str, force: bool = False):
+    if not APPDATA.joinpath("vault").is_file() or force:
+        salt: bytes = _build_salt(APPDATA)
+        _build_vault(APPDATA, salt, password)
+    else:
+        raise VaultExists(APPDATA)
 
 
-def build_salt(path: Path) -> bytes:
+def _build_salt(path: Path) -> bytes:
     salt: bytes = _salt()
     with path.joinpath("salt").open("wb") as binio:
         binio.write(salt)
     return salt
 
 
-def build_vault(path: Path, salt: bytes, password: str):
+def _build_vault(path: Path, salt: bytes, password: str):
     enc_data: bytes = encrypt(salt, password, dict())
     with path.joinpath("vault").open("wb") as binio:
         binio.write(enc_data)
