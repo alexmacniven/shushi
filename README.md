@@ -1,4 +1,4 @@
-# shushi ­ƒìñ
+# shushi 🍤
 Minimalist secrets management in Python for Windows.
 
 ## Requirements
