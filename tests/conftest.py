@@ -31,7 +31,14 @@ def new_item():
 
 
 @pytest.fixture
-def populated_data():
+def base_data():
+    return dict(
+        reddit=dict(user="Tom", password="J0nes")
+    )
+
+
+@pytest.fixture
+def data_with_twit():
     return dict(
         twitter=dict(user="Joe", password="Bl0ggs"),
         reddit=dict(user="Tom", password="J0nes")

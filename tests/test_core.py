@@ -3,6 +3,7 @@ import pytest
 from shushi.core import (APPDATA, VaultRecord, _build_salt, _build_vault,
                          add_item, get_item, list_items, make, remove_item,
                          validate_item_name)
+from shushi.exceptions import ItemExists, ItemNotFound
 
 
 def test_build_salt_returns_type(tmp_path):
@@ -26,25 +27,23 @@ def test_make_vault_creates_salt_path(password, mocker, tmp_path):
     assert APPDATA.joinpath("salt").is_file()
 
 
-def test_add_item_not_member_no_force(new_item, populated_data):
-    data = dict(reddit=dict(user="Tom", password="J0nes"))
-    assert add_item(new_item, data) is True
-    assert data == populated_data
+def test_add_item_not_member_no_force(new_item, base_data, data_with_twit):
+    add_item(new_item, base_data)
+    assert base_data == data_with_twit
 
 
-def test_add_item_is_member_no_force(new_item, populated_data):
-    data = populated_data
-    assert add_item(new_item, data) is False
-    assert data == populated_data
+def test_add_item_is_member_no_force(new_item, data_with_twit):
+    with pytest.raises(ItemExists):
+        add_item(new_item, data_with_twit)
 
 
-def test_add_item_is_member_with_force(new_item, populated_data):
+def test_add_item_is_member_with_force(new_item, data_with_twit):
     data = dict(
         twitter=dict(user="John", password="Sm1th"),
         reddit=dict(user="Tom", password="J0nes")
     )
-    assert add_item(new_item, data, force=True) is True
-    assert data == populated_data
+    add_item(new_item, data, force=True)
+    assert data == data_with_twit
 
 
 def test_validate_item_name(new_item):
@@ -70,29 +69,29 @@ def test_validate_item_name_raises(new_item):
         validate_item_name(new_item)
 
 
-def test_remove_item_is_member(populated_data):
+def test_remove_item_is_member(data_with_twit):
     name = "twitter"
-    assert remove_item(name, populated_data) is True
-    assert name not in populated_data.keys()
+    remove_item(name, data_with_twit)
+    assert name not in data_with_twit.keys()
 
 
-def test_remove_item_not_member(populated_data):
+def test_remove_item_not_member(base_data):
     name = "facebook"
-    assert remove_item(name, populated_data) is False
-    assert "twitter" in populated_data.keys()
-    assert "reddit" in populated_data.keys()
+    with pytest.raises(ItemNotFound):
+        remove_item(name, base_data)
 
 
-def test_get_item_is_member(populated_data):
-    record: VaultRecord = get_item("twitter", populated_data)
+def test_get_item_is_member(data_with_twit):
+    record: VaultRecord = get_item("twitter", data_with_twit)
     assert record.name == "twitter"
     assert record.user == "Joe"
     assert record.password == "Bl0ggs"
 
 
-def test_get_item_not_member(populated_data):
-    assert get_item("facebook", populated_data) is None
+def test_get_item_not_member(base_data):
+    with pytest.raises(ItemNotFound):
+        assert get_item("facebook", base_data)
 
 
-def test_list_items(populated_data):
-    assert list_items(populated_data) == ["twitter", "reddit"]
+def test_list_items(data_with_twit):
+    assert list_items(data_with_twit) == ["twitter", "reddit"]
