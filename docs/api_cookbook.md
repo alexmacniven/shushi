@@ -3,10 +3,10 @@ The underlying API powering the CLI application is open for use.
 
 Interacting with a shushi vault is via the commands `make`, `add`, `remove`, `list_names` and `get`.
 
-This guide will demonstrate the usage of the commands. But first, you may want to check out the notes on (Environment Variables)[.\environment_variables.md].
+This guide will demonstrate the usage of the commands. But first, you may want to check out the notes on [Environment Variables](./environment_variables.md).
 
 ## make
-Creates a new vault in your `APPDATA`;
+Creates a new vault in your `SHUSHI_DATA`;
 ```pycon
 >>> import shushi
 >>> shushi.make("my_password")
@@ -18,7 +18,7 @@ Creates a new vault in your `APPDATA`;
 ```
 
 ## add
-Adds a new item in the vault in your `APPDATA`;
+Adds a new item in the vault in your `SHUSHI_DATA`;
 ```pycon
 >>> import shushi
 >>> new_item = dict(name="facebook", user="joe bloggs", password="secret_phrase")
@@ -34,7 +34,7 @@ Adds a new item in the vault in your `APPDATA`;
 ```
 
 ## remove
-Removes an item from the vault in your `APPDATA`;
+Removes an item from the vault in your `SHUSHI_DATA`;
 ```pycon
 >>> import shushi
 >>> shushi.remove("facebook", "password")
@@ -42,7 +42,7 @@ Removes an item from the vault in your `APPDATA`;
 *An `ItemNotFound` is raised when the vault contains no item by the supplied `name`.*
 
 ## list_names
-Returns a list of all item names in the vault in your `APPDATA`;
+Returns a list of all item names in the vault in your `SHUSHI_DATA`;
 ```pycon
 >>> import shushi
 >>> shushi.list_names("password")
