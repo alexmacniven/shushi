@@ -3,9 +3,8 @@ from typing import List
 
 import click
 
-from . import core, crypto
+from . import api
 from .constants import APPDATA
-from .data import SetupFacts
 from .exceptions import (IncorrectPassword, ItemExists, ItemNotFound,
                          VaultExists)
 from .record import VaultRecord
@@ -34,7 +33,7 @@ def cli(ctx, password):
 @click.pass_context
 def make(ctx, force):
     try:
-        core.make(ctx.obj.get("password"), force)
+        api.make(ctx.obj.get("password"), force)
     except VaultExists as exc:
         exc.show()
         raise SystemExit(exc.exit_code)
@@ -51,22 +50,13 @@ def make(ctx, force):
 )
 @click.pass_context
 def add(ctx, name, force):
-    artifacts: SetupFacts = setup(ctx.obj.get("password"))
-    new_item: dict = item_builder(name)
-
+    item: dict = item_builder(name)
     try:
-        core.add_item(new_item, artifacts.decrypted, force)
-    except ItemExists as exc:
+        api.add(item, ctx.obj.get("password"), force)
+    except (IncorrectPassword, ItemExists) as exc:
         exc.show()
         raise SystemExit(exc.exit_code)
-
     click.echo(f"Done: A new item [{name}] has been added.")
-    encrypted: bytes = crypto.encrypt(
-        artifacts.salt,
-        ctx.obj.get("password"),
-        artifacts.decrypted
-    )
-    core.dump_vault(APPDATA, encrypted)
 
 
 def item_builder(name: str) -> dict:
@@ -86,14 +76,12 @@ def item_builder(name: str) -> dict:
 @click.argument("name")
 @click.pass_context
 def get(ctx, name):
-    artifacts: SetupFacts = setup(ctx.obj.get("password"))
-
     try:
-        item: VaultRecord = core.get_item(name, artifacts.decrypted)
-    except ItemNotFound as exc:
+        item: VaultRecord = api.get(name, ctx.obj.get("password"))
+    except (IncorrectPassword, ItemNotFound) as exc:
         exc.show()
         raise SystemExit(exc.exit_code)
-
+    # Output vault item to the console.
     for key, value in item.__dict__.items():
         click.echo(f"[{key}]:: ", nl=False)
         click.echo(f"{value}")
@@ -103,37 +91,22 @@ def get(ctx, name):
 @click.argument("name")
 @click.pass_context
 def remove(ctx, name):
-    artifacts: SetupFacts = setup(ctx.obj.get("password"))
     try:
-        core.remove_item(name, artifacts.decrypted)
-    except ItemNotFound as exc:
+        api.remove(name, ctx.obj.get("password"))
+    except (IncorrectPassword, ItemNotFound) as exc:
         exc.show()
         raise SystemExit(exc.exit_code)
-
     click.echo(f"Done: An item [{name}] has been removed.")
-    encrypted: bytes = crypto.encrypt(
-        artifacts.salt,
-        ctx.obj.get("password"),
-        artifacts.decrypted,
-    )
-    core.dump_vault(APPDATA, encrypted)
 
 
 @cli.command(help="Returns all item names")
 @click.pass_context
 def list(ctx):
-    artifacts: SetupFacts = setup(ctx.obj.get("password"))
-    items: List = core.list_items(artifacts.decrypted)
-    for item in items:
-        click.echo(item)
-
-
-def setup(password) -> SetupFacts:
-    salt: bytes = core.fetch_salt(APPDATA)
-    vault: bytes = core.fetch_vault(APPDATA)
     try:
-        decrypted: dict = crypto.decrypt(salt, password, vault)
+        items: List = api.list_names(ctx.obj.get("password"))
     except IncorrectPassword as exc:
         exc.show()
         raise SystemExit(exc.exit_code)
-    return SetupFacts(salt, vault, decrypted)
+    # Outout items to the console.
+    for item in items:
+        click.echo(item)

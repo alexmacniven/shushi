@@ -35,22 +35,9 @@ List all items in your vault:
 > shushi -p [password] list
 ```
 
-## Advanced CLI Usage
-Shushi can read your password from an Environment Variable `SHUSHI_PASSWORD`.
+## Advanced Usage
+[API Cookbook](./docs/api_cookbook.md)  
+[Environment Variables](./docs/environment_variables.md)
 
-Set your vault password Environment Variable:
-```posh
-> Set-Item -Path Env:SHUSHI_PASSWORD -Value "[password]"
-```
-
-This removes the need to use the `-p/--password` option when calling shushi commands.
-
-Before:
-```posh
-> shushi -p [password] get [name]
-```
-
-After:
-```posh
-> shushi get [name]
-```
+## Contribute
+Contributions are welcomed, please see the [contributions guide](./CONTRIBUTE.md).
