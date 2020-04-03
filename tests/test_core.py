@@ -1,17 +1,17 @@
 import pytest
 
-from shushi.core import (APPDATA, VaultRecord, _build_salt, _build_vault, add_item,
-                         get_item, list_items, make, remove_item,
+from shushi.core import (APPDATA, VaultRecord, _build_salt, _build_vault,
+                         add_item, get_item, list_items, make, remove_item,
                          validate_item_name)
 
 
-def test_build_salt_returns_type(app_path):
-    assert type(_build_salt(app_path)) == bytes
+def test_build_salt_returns_type(tmp_path):
+    assert type(_build_salt(tmp_path)) == bytes
 
 
-def test_build_vault_creates_file_path(app_path, vault_path, salt, password):
-    _build_vault(app_path, salt, password)
-    assert vault_path.is_file()
+def test_build_vault_creates_file_path(tmp_path, salt, password):
+    _build_vault(tmp_path, salt, password)
+    assert tmp_path.joinpath("vault").is_file()
 
 
 def test_make_vault_creates_file_path(password, mocker, tmp_path):

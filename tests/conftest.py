@@ -26,21 +26,6 @@ def enc_data():
 
 
 @pytest.fixture
-def app_path(tmp_path):
-    return tmp_path
-
-
-@pytest.fixture
-def vault_path(app_path):
-    return app_path.joinpath("vault")
-
-
-@pytest.fixture
-def salt_path(app_path):
-    return app_path.joinpath("salt")
-
-
-@pytest.fixture
 def new_item():
     return dict(name="twitter", user="Joe", password="Bl0ggs")
 
