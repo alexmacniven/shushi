@@ -83,8 +83,7 @@ def get(ctx, name):
         raise SystemExit(exc.exit_code)
     # Output vault item to the console.
     for key, value in item.__dict__.items():
-        click.echo(f"[{key}]:: ", nl=False)
-        click.echo(f"{value}")
+        click.echo(f"{key} = {value}")
 
 
 @cli.command(help="Removes an item")
