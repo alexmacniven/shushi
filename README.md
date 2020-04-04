@@ -1,6 +1,9 @@
 # shushi 🍤
 Minimalist secrets management in Python for Windows.
 
+Shushi was built to address the need for a one-stop storage location for sensitive data.  
+Instead of having your credentials scattered across your projects in multiple config files, Shushi offers an encrypted vault with access via a CLI application and an API.
+
 ## Requirements
 - Python 3.7.*
 
