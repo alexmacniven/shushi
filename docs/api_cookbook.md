@@ -33,6 +33,15 @@ Adds a new item in the vault in your `SHUSHI_DATA`;
 >>> shushi.add(new_item, "my_password", True)
 ```
 
+## get
+Retrieves an item as an instance of `VaultItem` from vault in your `SHUSHI_DATA`;
+```pycon
+>>> import shushi
+>>> shushi.get("facebook", "password")
+VaultItem(name="facebook", user="joe bloggs", password="secret_phrase")
+```
+*`VaultItem`'s members relate directly to the field/value pairs associated with the vault item.*
+
 ## remove
 Removes an item from the vault in your `SHUSHI_DATA`;
 ```pycon
